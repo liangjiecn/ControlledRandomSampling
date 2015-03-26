@@ -15,9 +15,9 @@ else
 end
 resultsFile = ['results\', subfix, '_LinearSVMSpectralFeatureRandomSampling.mat']; 
 groundTruth = importdata([subfix, '_gt.mat']);
-figure, imagesc(groundTruth);
+dataCube = normalise(rawData, 'percent',1);
+% figure, imagesc(groundTruth);
 [m, n, b] = size(rawData);
-dataCube = mapstd(rawData);
 vdataCube =  reshape(dataCube, [m*n,b]);
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));

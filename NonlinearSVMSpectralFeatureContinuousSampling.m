@@ -13,11 +13,11 @@ if isempty(indexof_)
 else
     subfix = DataFile(1:indexof_-1);
 end
-resultsFile = ['results\', subfix, '_NonlinearSVMSpectralFeatureRandomSampling.mat']; 
+resultsFile = ['results\', subfix, '_NonlinearSVMSpectralFeatureContinuousSampling.mat']; 
 groundTruth = importdata([subfix, '_gt.mat']);
+dataCube = normalise(rawData, 'percent',1);
 % figure, imagesc(groundTruth);
 [m, n, b] = size(rawData);
-dataCube = mapstd(rawData);
 vdataCube =  reshape(dataCube, [m*n,b]);
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));
@@ -62,8 +62,8 @@ for i = 1 : length(sampleRateList)
 %   figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
     mtrainingData = double(mtrainingData);
     %select parameters c and g
-    log2cList = -4:1:4;
-    log2gList = -4:1:4;
+    log2cList = -1:1:8;
+    log2gList = -1:1:8;
     cv = zeros(length(log2cList), length(log2gList) );
     parfor indexC = 1:length(log2cList)
       log2c = log2cList(indexC);
