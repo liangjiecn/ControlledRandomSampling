@@ -40,10 +40,7 @@ for indexofPc = 1:numfPC
       emp(:,:, mid - indexofSe) = closing;
    end
 end
-vemp = reshape(emp, [m*n,dimofMp]);
-emp = mapstd(vemp); % normalise
-feat = reshape(emp, [m, n, dimofMp]); 
-
+emp = normalise(emp,[], 1);
 if debug == true
    figure, 
    for i = 1:size(emp,3)
@@ -55,8 +52,9 @@ if debug == true
 end
 
 % step 3 Feature fusion
-
-
+% stack emp with original spectral feature
+dataCube = normalise(dataCube, [], 1);
+feat = cat(3, dataCube, emp);
 
 
 
