@@ -1,6 +1,14 @@
 % test the classification rate with the size of filter
 close all 
 clear,
+myCluster = parcluster('local');
+myCluster.NumWorkers = 8;
+saveProfile(myCluster);
+numWorkers = matlabpool('size');
+isPoolOpen = (numWorkers > 0);
+if(~isPoolOpen)
+    matlabpool;
+end
 DataFile = 'Indian_pines_corrected.mat';
 addpath('..\data\remote sensing data');
 addpath('..\tools\libsvm-3.20\windows');
