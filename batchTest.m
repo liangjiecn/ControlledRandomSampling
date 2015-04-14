@@ -18,6 +18,10 @@ end
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMSpectralFeatureContinuousSampling(x, 10));
 
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTRandomSampling(x,10));
-batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTContinuousSampling(x,10));
+% batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTContinuousSampling(x,10));
 
-batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMMorphologyRandomSampling(x,10));
+% batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMMorphologyRandomSampling(x,10));
+ batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVM3DDWTRandomSampling(x,10));
+ batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVM3DDWTContinuousSampling(x,10));
+ 
+
