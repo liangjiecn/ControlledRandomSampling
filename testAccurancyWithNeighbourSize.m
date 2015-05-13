@@ -11,7 +11,7 @@ if(~isPoolOpen)
 end
 DataFile = 'Indian_pines_corrected.mat';
 addpath('..\data\remote sensing data');
-addpath('..\tools\libsvm-3.20\windows');
+addpath('..\tools\libsvm-3.20\matlab');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3 
     return;
@@ -58,7 +58,7 @@ for repeat = 1:10
             for j = 1:size(rawData,3)
                 dataCube(:,:,j)=conv2( rawData(:,:,j),filter_mask,'same');
             end 
-            dataCube = mapstd(dataCube);
+            dataCube = normalise(dataCube,'percent', 1);
             vdataCube = reshape(dataCube,[m*n,b]);
             for c = 1: numofClass
                 cc  = double(c);
@@ -89,7 +89,7 @@ for repeat = 1:10
             [~, indexcv]= max(cv);
             bestc = 2^log2cList(indexcv); 
             optPara = [ '-q -t 0 -c ', num2str(bestc)];
-            svm = svmtrain(mtrainingLabels, mtrainingData, ['-t 0', optPara]);   
+            svm = svmtrain(mtrainingLabels, mtrainingData, ['-q -t 0', optPara]);   
             mtestingData = double(mtestingData);
             [predicted_label, rr, prob_estimates] = svmpredict(mtestingLabels, mtestingData, svm);  
             accuracy(i,indexofSize,repeat) = rr(1);
@@ -112,6 +112,8 @@ end
 % errorbar(mu(2,:), sigma(2,:),'r');
 % errorbar(mu(3,:), sigma(3,:),'g');
 % set(gca,'XTickLabel',{'';'0*0';''; '3*3';''; '5*5';''; '7*7'; ''; '9*9';''; '11*11'})
+
+save('results\testSpectralNeighbourSize.mat', 'mu','sigma','accuracy' );
 figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');
