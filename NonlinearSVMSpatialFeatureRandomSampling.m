@@ -6,8 +6,8 @@ function NonlinearSVMSpatialFeatureRandomSampling(groundTruthFile, timeofRepeati
 addpath('..\data\remote sensing data');
 addpath('..\tools\libsvm-3.20\matlab');
 groundTruth = importdata(groundTruthFile);
-resultsName = strrep(groundTruthFile, 'gt.mat', 'NonlinearSVMSpatialFeatureRandomSampling.mat');
-resultsFile = ['results\', resultsName]; 
+resultsName = strrep(groundTruthFile, 'gt.mat', [mfilename, '.mat']);
+resultsFile = ['Jresults\', resultsName]; 
 % figure, imagesc(groundTruth);
 [m, n] = size(groundTruth);
 % produce the training samples by randomly selecting from the each class in ground truth 
@@ -53,8 +53,8 @@ for i = 1 : length(sampleRateList)
     trainingMap(mtrainingIndex) = mtrainingLabels;
 %     figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
 %     select parameters c and g
-    log2cList = -4:1:4;
-    log2gList = -4:1:4;
+    log2cList = -5:1:6;
+    log2gList = -5:1:6;
     cv = zeros(length(log2cList), length(log2gList) );
     parfor indexC = 1:length(log2cList)
         log2c = log2cList(indexC);
@@ -72,19 +72,12 @@ for i = 1 : length(sampleRateList)
     bestg = 2^log2gList(bestindexG);
     optPara = [ '-q -c ', num2str(bestc), ' -g ', num2str(bestg)];
     svm = svmtrain(mtrainingLabels, mtrainingData, optPara);    % [, 'libsvm_options']);
-    [predicted_label, rr, prob_estimates] = svmpredict(mtestingLabels, mtestingData, svm);  % [, 'libsvm_options']);
-    accuracy(i, repeat) = rr(1);
+    [predicted_labels, ~, ~] = svmpredict(mtestingLabels, mtestingData, svm);  
     resultMap = vgroundTruth;
-    resultMap(mtestingIndex) = predicted_label;   
-%     figure, imagesc(reshape(resultMap,[m,n]));
-    % accurancy in each class
-    resultC = predicted_label == mtestingLabels;
-    for c = 1:numofClass
-        accuracyC(c,i,repeat) = sum(resultC(find(mtestingLabels == c)))/numofTest(c);
-    end
+    resultMap(mtestingIndex) = predicted_labels;
+%   figure, imagesc(reshape(resultMap,[m,n]));
+    results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA
 end
 end
-mu = mean(accuracy,2);
-sigma = std(accuracy, 0, 2);
-save(resultsFile, 'mu','sigma','accuracy', 'accuracyC' );
+save(resultsFile, 'results');
 

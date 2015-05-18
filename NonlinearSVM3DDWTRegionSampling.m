@@ -1,4 +1,4 @@
-function NonlinearSVM3DDWTRandomSampling(DataFile, timeofRepeatition)
+function NonlinearSVM3DDWTRegionSampling(DataFile, timeofRepeatition)
 % 
 addpath('..\data\remote sensing data');
 addpath('..\tools\libsvm-3.20\matlab');
@@ -19,8 +19,6 @@ feats = single(dwt3d_feature(rawData));
 vdataCube = reshape(feats,[m*n,15*b]);
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));
-trainingIndex = cell(numofClass,1);
-testingIndex = cell(numofClass,1);
 trainingSamples = cell(numofClass,1);
 testingSamples = cell(numofClass,1);
 trainingLabels = cell(numofClass,1);
@@ -29,17 +27,14 @@ numofTest = zeros(numofClass,1);
 sampleRateList = [0.05, 0.1, 0.25];
 for repeat = 1:timeofRepeatition
 for i = 1 : length(sampleRateList)
-    sampleRate = sampleRateList(i);
+    samplingRate = sampleRateList(i);
+    if i == 1 % try to use the same seeds when using different sampling rate
+        [trainingIndex, testingIndex, seeds] = createTrainingSamples(groundTruth, samplingRate);
+    else
+        [trainingIndex, testingIndex] = createTrainingSamples(groundTruth, samplingRate, seeds);
+    end
     for c = 1: numofClass
         cc  = double(c);
-        class = find(vgroundTruth == c);
-        if isempty(class)
-            continue;
-        end
-        perm = randperm(numel(class)); 
-        breakpoint = round(numel(class)*sampleRate);
-        trainingIndex{c} = class(perm(1:breakpoint));
-        testingIndex{c} = class(perm(breakpoint+1:end));
         trainingSamples{c} = vdataCube(trainingIndex{c},:);
         trainingLabels{c} = ones(length(trainingIndex{c}),1)*cc;
         testingSamples{c} = vdataCube(testingIndex{c},:);
