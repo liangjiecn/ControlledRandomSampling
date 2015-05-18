@@ -13,7 +13,7 @@ if isempty(indexof_)
 else
     subfix = DataFile(1:indexof_-1);
 end
-resultsFile = ['results\', subfix, '_NonlinearSVMSpectralFeatureRandomSampling.mat']; 
+resultsFile = ['Jresults\', subfix, '_', mfilename, '.mat']; 
 groundTruth = importdata([subfix, '_gt.mat']);
 dataCube = normalise(rawData, 'percent',1);
 % figure, imagesc(groundTruth);
@@ -61,8 +61,8 @@ for i = 1 : length(sampleRateList)
 %   figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
     mtrainingData = double(mtrainingData);
     %select parameters c and g
-    log2cList = -1:1:8;
-    log2gList = -1:1:8;
+    log2cList = -1:1:10;
+    log2gList = -1:1:10;
     cv = zeros(length(log2cList), length(log2gList) );
     parfor indexC = 1:length(log2cList)
       log2c = log2cList(indexC);
@@ -81,18 +81,11 @@ for i = 1 : length(sampleRateList)
     optPara = [ '-q -c ', num2str(bestc), ' -g ', num2str(bestg)];
     svm = svmtrain(mtrainingLabels, mtrainingData, optPara);    
     mtestingData = double(mtestingData);
-    [predicted_label, rr, prob_estimates] = svmpredict(mtestingLabels, mtestingData, svm);  
-    accuracy(i, repeat) = rr(1);
+    [predicted_labels, ~, ~] = svmpredict(mtestingLabels, mtestingData, svm);  
     resultMap = vgroundTruth;
-    resultMap(mtestingIndex) = predicted_label;
+    resultMap(mtestingIndex) = predicted_labels;
 %   figure, imagesc(reshape(resultMap,[m,n]));
-    % accurancy in each class
-    resultC = predicted_label == mtestingLabels;
-    for c = 1:numofClass
-        accuracyC(c,i,repeat) = sum(resultC(find(mtestingLabels == c)))/numofTest(c);
-    end  
+    results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA
 end
 end
-mu = mean(accuracy,2);
-sigma = std(accuracy, 0, 2);
-save(resultsFile, 'mu','sigma','accuracy', 'accuracyC' );
+save(resultsFile, 'results');
