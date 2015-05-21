@@ -110,7 +110,7 @@ switch lower(par)
 	RESULTS.varKappa        = varKappa;
 	RESULTS.Z               = Z;       
 	RESULTS.CI              = CI;
-    RESULTS.AA              = AA;
+    RESULTS.AA              = 100*AA;
     
 	
 case 'regress'
