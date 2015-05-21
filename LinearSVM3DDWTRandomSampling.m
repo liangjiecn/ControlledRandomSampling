@@ -57,7 +57,7 @@ for i = 1 : length(sampleRateList)
 %     figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
     mtrainingData = double(mtrainingData);
     %select parameters c and g
-    log2cList = 1:1:12;
+    log2cList = -1:1:16;
     cv = zeros(length(log2cList), 1);
     parfor indexC = 1:length(log2cList)
         log2c = log2cList(indexC);
