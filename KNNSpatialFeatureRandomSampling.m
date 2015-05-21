@@ -1,8 +1,8 @@
-% hyperspectral classification with spatial feature(2d coordinates) using random sampling
-% and nonlinear SVM
+% hyperspectral classification with spatial feature(2d coordinates) using
+% KNN
 % Jie Liang
-% 2014-09-12
-function NonlinearSVMSpatialFeatureRandomSampling(groundTruthFile, timeofRepeatition)
+% 2015-05-20
+function KNNSpatialFeatureRandomSampling(groundTruthFile, timeofRepeatition)
 addpath('..\data\remote sensing data');
 addpath('..\tools\libsvm-3.20\matlab');
 groundTruth = importdata(groundTruthFile);
@@ -55,30 +55,13 @@ for i = 1 : length(sampleRateList)
     trainingMap = zeros(m*n,1);
     trainingMap(mtrainingIndex) = mtrainingLabels;
 %     figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
-%     select parameters c and g
-    log2cList = -5:1:6;
-    log2gList = -5:1:6;
-    cv = zeros(length(log2cList), length(log2gList) );
-    parfor indexC = 1:length(log2cList)
-        log2c = log2cList(indexC);
-        tempcv = zeros(1,length(log2gList));
-        for indexG = 1:length(log2gList)
-           log2g =  log2gList(indexG);
-           cmd = ['-q -v 5 -c ', num2str(2^log2c), ' -g ', num2str(2^log2g)];
-           tempcv(indexG) = svmtrain(mtrainingLabels, mtrainingData, cmd);
-        end
-        cv(indexC,:) = tempcv;
-    end
-    [~, indexcv]= max(cv(:));
-    [bestindexC, bestindexG] = ind2sub(size(cv), indexcv);
-    bestc = 2^log2cList(bestindexC);
-    bestg = 2^log2gList(bestindexG);
-    optPara = [ '-q -c ', num2str(bestc), ' -g ', num2str(bestg)];
-    svm = svmtrain(mtrainingLabels, mtrainingData, optPara);    % [, 'libsvm_options']);
-    [predicted_labels, ~, ~] = svmpredict(mtestingLabels, mtestingData, svm);  
+%    KNN
+    mdl = ClassificationKNN.fit(mtrainingData,mtrainingLabels);
+    predicted_labels = predict(mdl,mtestingData);
+    
     resultMap = vgroundTruth;
     resultMap(mtestingIndex) = predicted_labels;
-%   figure, imagesc(reshape(resultMap,[m,n]));
+  %  figure, imagesc(reshape(resultMap,[m,n]));
     results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA
 end
 end

@@ -38,7 +38,7 @@ numofTest = zeros(numofClass,1);
 sampleRateList = [0.05, 0.1, 0.25];
 filterSizeList = [1 3, 5, 7, 9, 11];
 dataCube = zeros(m,n,b);
-for repeat = 1:10 % repeat 10 times
+for repeat = 1:1
     for i = 1 : length(sampleRateList)
         sampleRate = sampleRateList(i);
         for c = 1: numofClass
@@ -50,8 +50,8 @@ for repeat = 1:10 % repeat 10 times
             perm = randperm(numel(class));  %  random sampling
             breakpoint = round(numel(class)*sampleRate);
             trainingIndex{c} = class(perm(1:breakpoint));
-            testingIndex{c} = class(perm(breakpoint+1:end));
-            numofTest(c) = numel(testingIndex{c});
+            testingIndex{c} = class(perm(breakpoint+1:end)); 
+          %  numofTest(c) = numel(testingIndex{c});
         end
         for indexofSize = 1:length(filterSizeList)
             filterSize = filterSizeList(indexofSize);
@@ -60,24 +60,34 @@ for repeat = 1:10 % repeat 10 times
                 dataCube(:,:,j)=conv2( rawData(:,:,j),filter_mask,'same');
             end 
             dataCube = normalise(dataCube,'percent', 1);
-            vdataCube = reshape(dataCube,[m*n,b]);
-            for c = 1: numofClass
-                cc  = double(c);
-                trainingSamples{c} = vdataCube(trainingIndex{c},:);
-                trainingLabels{c} = ones(length(trainingIndex{c}),1)*cc;
-                testingSamples{c} = vdataCube(testingIndex{c},:);
-                testingLabels{c} = ones(length(testingIndex{c}),1)*cc;
-            end
-
-            mtrainingData = cell2mat(trainingSamples);
-            mtrainingLabels = cell2mat(trainingLabels);
+            vdataCube = reshape(dataCube,[m*n,b]);                    
             mtrainingIndex = cell2mat(trainingIndex);
-            mtestingData = cell2mat(testingSamples);
-            mtestingLabels = cell2mat(testingLabels);
-            mtestingIndex = cell2mat(testingIndex); 
+            mtrainingData = vdataCube(mtrainingIndex,:);
+            mtrainingLabels = vgroundTruth(mtrainingIndex);
+            mtestingIndex = cell2mat(testingIndex);
             trainingMap = zeros(m*n,1);
             trainingMap(mtrainingIndex) = mtrainingLabels;
-    %       figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+%            figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+            % create non-overlapping testing data
+            halfheightfilter = floor(filterSize/2);
+            halfwidthfilter = floor(filterSize/2);
+            tempGroundTruth = padarray(groundTruth,[halfheightfilter,halfwidthfilter]); % incase for the Subscript out of border
+            tempGroundTruth(tempGroundTruth>0) = 1;
+            for indexpoint = 1: size(mtrainingIndex)   
+                [x,y] = ind2sub([m,n],mtrainingIndex(indexpoint));
+                tempGroundTruth(x:x+2*halfheightfilter, y:y+2*halfwidthfilter) = 0;
+            end  
+            leftTest = sum(tempGroundTruth(:));
+            percentage = 1 - leftTest/numel(mtestingIndex);
+            disp(percentage);
+            tempGroundTruth = tempGroundTruth(halfheightfilter+1:end-halfheightfilter, halfwidthfilter+1: end-halfwidthfilter);
+            mtestingIndex = find(tempGroundTruth == 1);
+            mtestingData =  vdataCube(mtestingIndex,:);
+            mtestingLabels = vgroundTruth(mtestingIndex); 
+            testingMap = zeros(m*n,1);
+            testingMap(mtestingIndex) = mtestingLabels;
+            figure; imagesc(reshape(testingMap,[m,n])); % check the training samples 
+            title(['Overlap = ', num2str(percentage*100), '% when sampling rate = ', num2str(sampleRate*100), '%', 'and filter size = ', num2str(filterSize)  ], 'FontSize', 10);
             mtrainingData = double(mtrainingData);
             %select parameters c and g
             log2cList = -1:1:16;
@@ -107,7 +117,7 @@ for repeat = 1:10 % repeat 10 times
     end
 end
 
- mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
+mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
 % figure, errorbar(mu(1,:), sigma(1,:));
 % hold on,
 % errorbar(mu(2,:), sigma(2,:),'r');

@@ -10,6 +10,7 @@ isPoolOpen = (numWorkers > 0);
 if(~isPoolOpen)
     matlabpool;
 end
+ batch('..\data\remote sensing data', '*_gt.mat', @(x)KNNSpatialFeatureRandomSampling(x,10));
  batch('..\data\remote sensing data', '*_gt.mat', @(x)NonlinearSVMSpatialFeatureRandomSampling(x,1));
 
 

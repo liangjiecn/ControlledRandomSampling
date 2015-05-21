@@ -3,7 +3,7 @@
 close all 
 clear,
 myCluster = parcluster('local');
-myCluster.NumWorkers = 6;
+myCluster.NumWorkers = 8;
 saveProfile(myCluster);
 numWorkers = matlabpool('size');
 isPoolOpen = (numWorkers > 0);
@@ -38,7 +38,7 @@ numofTest = zeros(numofClass,1);
 sampleRateList = [0.05, 0.1, 0.25];
 filterSizeList = [1 3, 5, 7, 9, 11];
 dataCube = zeros(m,n,b);
-for repeat = 1:10 % repeat 10 times
+for repeat = 1:10
     for i = 1 : length(sampleRateList)
         sampleRate = sampleRateList(i);
         for c = 1: numofClass
@@ -50,8 +50,8 @@ for repeat = 1:10 % repeat 10 times
             perm = randperm(numel(class));  %  random sampling
             breakpoint = round(numel(class)*sampleRate);
             trainingIndex{c} = class(perm(1:breakpoint));
-            testingIndex{c} = class(perm(breakpoint+1:end));
-            numofTest(c) = numel(testingIndex{c});
+            testingIndex{c} = class(perm(breakpoint+1:end)); 
+          %  numofTest(c) = numel(testingIndex{c});
         end
         for indexofSize = 1:length(filterSizeList)
             filterSize = filterSizeList(indexofSize);
@@ -60,24 +60,38 @@ for repeat = 1:10 % repeat 10 times
                 dataCube(:,:,j)=conv2( rawData(:,:,j),filter_mask,'same');
             end 
             dataCube = normalise(dataCube,'percent', 1);
-            vdataCube = reshape(dataCube,[m*n,b]);
-            for c = 1: numofClass
-                cc  = double(c);
-                trainingSamples{c} = vdataCube(trainingIndex{c},:);
-                trainingLabels{c} = ones(length(trainingIndex{c}),1)*cc;
-                testingSamples{c} = vdataCube(testingIndex{c},:);
-                testingLabels{c} = ones(length(testingIndex{c}),1)*cc;
-            end
-
-            mtrainingData = cell2mat(trainingSamples);
-            mtrainingLabels = cell2mat(trainingLabels);
+            vdataCube = reshape(dataCube,[m*n,b]);                    
             mtrainingIndex = cell2mat(trainingIndex);
-            mtestingData = cell2mat(testingSamples);
-            mtestingLabels = cell2mat(testingLabels);
-            mtestingIndex = cell2mat(testingIndex); 
+            mtrainingData = vdataCube(mtrainingIndex,:);
+            mtrainingLabels = vgroundTruth(mtrainingIndex);
             trainingMap = zeros(m*n,1);
             trainingMap(mtrainingIndex) = mtrainingLabels;
-    %       figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+%           figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+            mtestingIndex = cell2mat(testingIndex);
+            mtestingData =  vdataCube(mtestingIndex,:);
+            mtestingLabels = vgroundTruth(mtestingIndex);    
+            % find non-overlapping testing data
+            halfheightfilter = floor(filterSize/2);
+            halfwidthfilter = floor(filterSize/2);
+            tempGroundTruth = padarray(groundTruth,[halfheightfilter,halfwidthfilter]); % incase for the Subscript out of border
+            tempGroundTruth(tempGroundTruth>0) = 1;
+            for indexpoint = 1: size(mtrainingIndex)   
+                [x,y] = ind2sub([m,n],mtrainingIndex(indexpoint));
+                tempGroundTruth(x:x+2*halfheightfilter, y:y+2*halfwidthfilter) = 0;
+            end  
+            leftTest = sum(tempGroundTruth(:));
+            percentage(i,indexofSize,repeat) = 1 - leftTest/numel(mtestingIndex);
+%             disp(percentage);
+            % remove the padded edges
+            tempGroundTruth = ...
+                tempGroundTruth(halfheightfilter+1:end-halfheightfilter, halfwidthfilter+1: end-halfwidthfilter);
+            nonmtestingIndex = find(tempGroundTruth == 1);
+            nonmtestingData =  vdataCube(nonmtestingIndex,:);
+            nonmtestingLabels = vgroundTruth(nonmtestingIndex); 
+            testingMap = zeros(m*n,1);
+            testingMap(mtestingIndex) = mtestingLabels;
+%             figure; imagesc(reshape(testingMap,[m,n])); % check the training samples 
+          %  title(['Overlap = ', num2str(percentage*100), '% when sampling rate = ', num2str(sampleRate*100), '%', 'and filter size = ', num2str(filterSize)  ], 'FontSize', 10);
             mtrainingData = double(mtrainingData);
             %select parameters c and g
             log2cList = -1:1:16;
@@ -92,34 +106,36 @@ for repeat = 1:10 % repeat 10 times
             optPara = [ '-q -t 0 -c ', num2str(bestc)];
             svm = svmtrain(mtrainingLabels, mtrainingData,  optPara);   
             mtestingData = double(mtestingData);
-            [predicted_label, rr, prob_estimates] = svmpredict(mtestingLabels, mtestingData, svm);  
-            accuracy(i,indexofSize,repeat) = rr(1);
+            [predicted_label, ac, ~] = svmpredict(mtestingLabels, mtestingData, svm);  
+            accuracy(i,indexofSize,repeat) = ac(1);
             resultMap = vgroundTruth;
             resultMap(mtestingIndex) = predicted_label;
-%             figure; imagesc(reshape(resultMap,[m,n]));
-            % accurancy in each class
-%             resultC = predicted_label == mtestingLabels;
-%             for c = 1:numofClass
-%                 accuracyC(c,i) = sum(resultC(find(mtestingLabels == c)))/numofTest(c);
-%             end
-    %         save(resultsFile, 'accuracy', 'accuracyC' );
+            nonmtestingData = double(nonmtestingData);
+            [predicted_label, ac, ~] = svmpredict(nonmtestingLabels, nonmtestingData, svm); 
+            nonaccuracy(i,indexofSize,repeat) = ac(1);
+%           figure; imagesc(reshape(resultMap,[m,n]));
         end
     end
 end
 
- mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
-% figure, errorbar(mu(1,:), sigma(1,:));
-% hold on,
-% errorbar(mu(2,:), sigma(2,:),'r');
-% errorbar(mu(3,:), sigma(3,:),'g');
-% set(gca,'XTickLabel',{'';'0*0';''; '3*3';''; '5*5';''; '7*7'; ''; '9*9';''; '11*11'})
+mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
+nonmu = mean(nonaccuracy,3); nonsigma = std(nonaccuracy,0, 3);
 
-save('Jresults\testSpectralNeighbourSize.mat', 'mu','sigma','accuracy' );
+save('Jresults\testAccurancyWithandWithoutOverlap.mat', 'mu','sigma',...
+    'accuracy','nonmu','nonsigma','nonaccuracy','percentage' );
 figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
-set(gca,'XTickLabel',{'';'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
+set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
+title('raw accuracy')
+
+figure, plot(nonmu(1,:));
+hold on
+plot(nonmu(2,:), 'r');
+plot(nonmu(3,:), 'g');
+set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
+title('non accuracy')
 
 
 
