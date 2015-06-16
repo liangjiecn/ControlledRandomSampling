@@ -2,7 +2,7 @@ function LinearSVMSpectralFeatureContinuousSampling(DataFile, timeofRepeatition)
 % hyperspectral classification with spectral feature using random sampling
 % and linear SVM
 addpath('..\data\remote sensing data');
-addpath('..\Matlab\tools\libsvm-3.20\matlab');
+addpath('..\tools\libsvm-3.20\matlab'); 
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3
     return;
@@ -57,7 +57,7 @@ for i = 1 : length(sampleRateList)
     mtestingIndex = cell2mat(testingIndex); 
     trainingMap = zeros(m*n,1);
     trainingMap(mtrainingIndex) = mtrainingLabels;
-%     figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+    % figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
     mtrainingData = double(mtrainingData);
     %select parameters c and g
     log2cList = -1:0.5:5;
@@ -75,7 +75,7 @@ for i = 1 : length(sampleRateList)
     [predicted_labels, ~, ~] = svmpredict(mtestingLabels, mtestingData, svm);  
     resultMap = vgroundTruth;
     resultMap(mtestingIndex) = predicted_labels;
-%   figure, imagesc(reshape(resultMap,[m,n]));
+  % figure, imagesc(reshape(resultMap,[m,n]));
     results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA  
 end
 end

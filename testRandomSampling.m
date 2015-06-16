@@ -1,10 +1,9 @@
-function testRegionSampling(DataFile)
-% test the region sampling with different sampling rate
+function testRandomSampling(DataFile)
+% test the random sampling with different sampling rate
 % draw the original map, traing samples map and testing samples map
 % DataFile: hyperspectral data file
 close all;
 addpath('..\data\remote sensing data');
-addpath('..\tools\RegionGrowing');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3
     return;
@@ -18,10 +17,13 @@ end
 groundTruth = importdata([subfix, '_gt.mat']);
 dataCube = normalise(rawData, 'percent',1);
 figure, imagesc(groundTruth);
-set(gca,'position',[0 0 1 1],'units','normalized');
+axis off
 [m, n, b] = size(rawData);
 vdataCube =  reshape(dataCube, [m*n,b]);
+vgroundTruth = reshape(groundTruth, [m*n,1]);
 numofClass = max(groundTruth(:));
+trainingIndex = cell(numofClass,1);
+testingIndex = cell(numofClass,1);
 trainingSamples = cell(numofClass,1);
 testingSamples = cell(numofClass,1);
 trainingLabels = cell(numofClass,1);
@@ -29,14 +31,17 @@ testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
 sampleRateList = [0.05, 0.1, 0.25];
 for i = 1 : length(sampleRateList)
-    samplingRate = sampleRateList(i);
-    if i == 1 % try to use the same seeds when using different sampling rate
-        [trainingIndex, testingIndex, seeds] = createTrainingSamples(groundTruth, samplingRate);
-    else
-        [trainingIndex, testingIndex] = createTrainingSamples(groundTruth, samplingRate, seeds);
-    end
+    sampleRate = sampleRateList(i);
     for c = 1: numofClass
         cc  = double(c);
+        class = find(vgroundTruth == c);
+        if isempty(class)
+            continue;
+        end
+        perm = randperm(numel(class)); 
+        breakpoint = round(numel(class)*sampleRate);
+        trainingIndex{c} = class(perm(1:breakpoint));
+        testingIndex{c} = class(perm(breakpoint+1:end));
         trainingSamples{c} = vdataCube(trainingIndex{c},:);
         trainingLabels{c} = ones(length(trainingIndex{c}),1)*cc;
         testingSamples{c} = vdataCube(testingIndex{c},:);
@@ -51,6 +56,7 @@ for i = 1 : length(sampleRateList)
     trainingMap(mtrainingIndex) = mtrainingLabels;
     figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
     set(gca,'position',[0 0 1 1],'units','normalized');
+%      set(gca,'position',[0 0 1 1],'units','normalized');
     testingMap = zeros(m*n,1);
     testingMap(mtestingIndex) = mtestingLabels;
    % figure, imagesc(reshape(testingMap,[m,n]));
