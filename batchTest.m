@@ -3,26 +3,26 @@
 close all, 
 clear, 
 myCluster = parcluster('local');
-myCluster.NumWorkers = 8;
+myCluster.NumWorkers = 6;
 saveProfile(myCluster);
 numWorkers = matlabpool('size');
 isPoolOpen = (numWorkers > 0);
 if(~isPoolOpen)
     matlabpool;
 end
- batch('..\data\remote sensing data', '*_gt.mat', @(x)KNNSpatialFeatureRandomSampling(x,10));
- batch('..\data\remote sensing data', '*_gt.mat', @(x)NonlinearSVMSpatialFeatureRandomSampling(x,1));
+%  batch('..\data\remote sensing data', '*_gt.mat', @(x)KNNSpatialFeatureRandomSampling(x,10));
+%  batch('..\data\remote sensing data', '*_gt.mat', @(x)NonlinearSVMSpatialFeatureRandomSampling(x,1));
 
 
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMSpectralFeatureRandomSampling(x, 1));
-batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMSpectralFeatureRegionSampling(x, 1));
-batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRandomSampling(x, 1));
-batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRegionSampling(x, 1));
+% batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMSpectralFeatureRegionSampling(x, 1));
+batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRandomSampling(x, 10));
+% batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRegionSampling(x, 10));
 
-batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMMorphologyRandomSampling(x,1));
-batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMMorphologyRegionSampling(x,1));
-batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMMorphologyRandomSampling(x,1));
-batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMMorphologyRegionSampling(x,1));
+% batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMMorphologyRandomSampling(x,1));
+% batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMMorphologyRegionSampling(x,1));
+% batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMMorphologyRandomSampling(x,10));
+% batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMMorphologyRegionSampling(x,10));
 
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTRandomSampling(x,1));
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTRegionSampling(x,1));
