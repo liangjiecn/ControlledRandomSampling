@@ -1,6 +1,6 @@
 % calculate and draw the overlap of training samples and testing samples
 close all,
-addpath('E:\Matlab\data\remote sensing data');
+addpath('..\data\remote sensing data');
 groundTruth = importdata('Indian_gt.mat');
 [m, n] = size(groundTruth);
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);

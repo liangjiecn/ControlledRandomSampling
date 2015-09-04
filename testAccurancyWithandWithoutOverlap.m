@@ -36,7 +36,7 @@ testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
 % accuracyC = zeros(numofClass,3);
 sampleRateList = [0.05, 0.1, 0.25];
-filterSizeList = [1 3, 5, 7, 9, 11];
+filterSizeList = [1, 3, 5, 7, 9, 11];
 dataCube = zeros(m,n,b);
 for repeat = 1:10
     for i = 1 : length(sampleRateList)
@@ -66,7 +66,7 @@ for repeat = 1:10
             mtrainingLabels = vgroundTruth(mtrainingIndex);
             trainingMap = zeros(m*n,1);
             trainingMap(mtrainingIndex) = mtrainingLabels;
-%           figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+%             figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
             mtestingIndex = cell2mat(testingIndex);
             mtestingData =  vdataCube(mtestingIndex,:);
             mtestingLabels = vgroundTruth(mtestingIndex);    
@@ -74,18 +74,18 @@ for repeat = 1:10
             halfheightfilter = floor(filterSize/2);
             halfwidthfilter = floor(filterSize/2);
             tempGroundTruth = padarray(groundTruth,[halfheightfilter,halfwidthfilter]); % incase for the Subscript out of border
-            tempGroundTruth(tempGroundTruth>0) = 1;
+            tempGroundTruth(tempGroundTruth>0) = 1; % assign all samples to non zero
             for indexpoint = 1: size(mtrainingIndex)   
                 [x,y] = ind2sub([m,n],mtrainingIndex(indexpoint));
-                tempGroundTruth(x:x+2*halfheightfilter, y:y+2*halfwidthfilter) = 0;
+                tempGroundTruth(x:x+2*halfheightfilter, y:y+2*halfwidthfilter) = 0; % assign the training area to zero
             end  
             leftTest = sum(tempGroundTruth(:));
             percentage(i,indexofSize,repeat) = 1 - leftTest/numel(mtestingIndex);
 %             disp(percentage);
             % remove the padded edges
             tempGroundTruth = ...
-                tempGroundTruth(halfheightfilter+1:end-halfheightfilter, halfwidthfilter+1: end-halfwidthfilter);
-            nonmtestingIndex = find(tempGroundTruth == 1);
+                tempGroundTruth(halfheightfilter+1:end-halfheightfilter, halfwidthfilter+1: end-halfwidthfilter);% recover the real size
+            nonmtestingIndex = find(tempGroundTruth == 1); %find the left testing samples (non-overlap)
             nonmtestingData =  vdataCube(nonmtestingIndex,:);
             nonmtestingLabels = vgroundTruth(nonmtestingIndex); 
             testingMap = zeros(m*n,1);
@@ -106,18 +106,17 @@ for repeat = 1:10
             optPara = [ '-q -t 0 -c ', num2str(bestc)];
             svm = svmtrain(mtrainingLabels, mtrainingData,  optPara);   
             mtestingData = double(mtestingData);
-            [predicted_label, ac, ~] = svmpredict(mtestingLabels, mtestingData, svm);  
+            [predicted_label, ac, ~] = svmpredict(mtestingLabels, mtestingData, svm);% classify all testing samples
             accuracy(i,indexofSize,repeat) = ac(1);
             resultMap = vgroundTruth;
             resultMap(mtestingIndex) = predicted_label;
             nonmtestingData = double(nonmtestingData);
-            [predicted_label, ac, ~] = svmpredict(nonmtestingLabels, nonmtestingData, svm); 
+            [predicted_label, ac, ~] = svmpredict(nonmtestingLabels, nonmtestingData, svm); % classify non-overlap testing samples
             nonaccuracy(i,indexofSize,repeat) = ac(1);
-%           figure; imagesc(reshape(resultMap,[m,n]));
+%             figure; imagesc(reshape(resultMap,[m,n]));
         end
     end
 end
-
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
 nonmu = mean(nonaccuracy,3); nonsigma = std(nonaccuracy,0, 3);
 
