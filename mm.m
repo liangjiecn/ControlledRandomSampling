@@ -1,5 +1,5 @@
 function feat = mm(dataCube)
-
+% Jie Liang
 % mathematical morphological methods 
 % implement the extended morphological profiles method for hyperspectral image classfication 
 % reference - Fauvel, M.; Tarabalka, Y.; Benediktsson, J.A.; Chanussot, J.; Tilton, J.C., "Advances in Spectral-Spatial Classification of Hyperspectral Images," Proceedings of the IEEE , vol.101, no.3, pp.652,675, March 2013
