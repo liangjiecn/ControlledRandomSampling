@@ -13,9 +13,9 @@ if isempty(indexof_)
 else
     subfix = DataFile(1:indexof_-1);
 end
-resultsFile = ['Jresults\', subfix, '_', mfilename, '.mat']; 
+resultsFile = ['VJresults\', subfix, '_', mfilename, '.mat']; 
 groundTruth = importdata([subfix, '_gt.mat']);
-dataCube = normalise(rawData, 'percent',1);
+dataCube = normalise(rawData, 'percent',0.999);
 % figure, imagesc(groundTruth);
 [m, n, b] = size(rawData);
 vdataCube =  reshape(dataCube, [m*n,b]);
