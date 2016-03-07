@@ -36,7 +36,7 @@ testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
 % accuracyC = zeros(numofClass,3);
 sampleRateList = [0.05, 0.1, 0.25];
-filterSizeList = [1 3, 5, 7, 9, 11];
+filterSizeList = [1, 3, 5, 7, 9, 11, 15, 20, 30];
 dataCube = zeros(m,n,b);
 for repeat = 1:10 % repeat 10 times
     for i = 1 : length(sampleRateList)
@@ -119,7 +119,7 @@ figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
-set(gca,'XTickLabel',{'';'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
+set(gca,'XTickLabel',{'';'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'; '15*15'; '20*20'; '30*30'});
 
 
 

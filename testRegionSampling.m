@@ -53,5 +53,5 @@ for i = 1 : length(sampleRateList)
     set(gca,'position',[0 0 1 1],'units','normalized');
     testingMap = zeros(m*n,1);
     testingMap(mtestingIndex) = mtestingLabels;
-   % figure, imagesc(reshape(testingMap,[m,n]));
+    figure, imagesc(reshape(testingMap,[m,n]));
 end
