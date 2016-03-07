@@ -16,7 +16,11 @@ end
 
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMSpectralFeatureRandomSampling(x, 1));
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMSpectralFeatureRegionSampling(x, 1));
-batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRandomSampling(x, 10));
+% batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRandomSampling(x, 10));
+
+
+% NonlinearSVMSpectralFeatureRandomSampling('Salinas_corrected.mat', 5);
+% NonlinearSVMSpectralFeatureRandomSampling('PaviaU.mat', 5);
 % batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRegionSampling(x, 10));
 
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMMorphologyRandomSampling(x,1));
@@ -37,6 +41,8 @@ batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRan
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTRandomSampling(x,10));
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTRegionSampling(x,10));
 
+testAccurancyWithMeanfilterRandomSampling;
+testAccurancyWithMeanfilterRegionSampling;
 
  
 

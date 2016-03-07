@@ -28,7 +28,7 @@ for i=1:size(feats,3)
     feats(:,:,i)=conv2( feats(:,:,i),filter_mask,'same');
 end
 feats=reshape(feats,[m*n, b*15]);
-feats1 = feats(1:round(end/2),:); % LJ
+feats1 = feats(1:round(end/2),:); % LJ to reduce computational burden
 feats2 = feats(round(end/2)+1:end,:); % LJ
 clear feats; %LJ
 feats1 = mapstd(feats1);  % LJ

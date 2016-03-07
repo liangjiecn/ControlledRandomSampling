@@ -3,7 +3,7 @@ function testRegionSampling(DataFile)
 % draw the original map, traing samples map and testing samples map
 % DataFile: hyperspectral data file
 close all;
-addpath('..\data\remote sensing data');
+addpath('..\data\remoteData');
 addpath('..\tools\RegionGrowing');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3

@@ -1,5 +1,6 @@
 function T = listresults(feature, method, sampling, varargin )
-% put results in table
+% list results in table
+% example: listresults('spectral', 'Nonlinear', 'Random', 'AA');
 resultsPath = 'Jresults';
 cd (resultsPath);
 if isempty(varargin)
