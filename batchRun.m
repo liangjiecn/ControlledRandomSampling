@@ -1,4 +1,4 @@
-function batch(folder, extention, myfunc)
+function batchRun(folder, extention, myfunc)
 %%batch reads hyperspectral data in the specific folder, then use myfunc to 
 %%process it
 % cd(folder);

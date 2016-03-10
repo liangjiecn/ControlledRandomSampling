@@ -11,7 +11,7 @@ if(~isPoolOpen)
     matlabpool;
 end
 DataFile = 'Indian_pines_corrected.mat';
-addpath('..\data\remote sensing data');
+addpath('..\data\remoteData');
 addpath('..\tools\libsvm-3.20\matlab');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3 
@@ -35,7 +35,7 @@ trainingLabels = cell(numofClass,1);
 testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
 % accuracyC = zeros(numofClass,3);
-sampleRateList = [0.05, 0.1, 0.25];
+sampleRateList = [0.01, 0.05, 0.1, 0.25];
 filterSizeList = [1, 3, 5, 7, 9, 11];
 dataCube = zeros(m,n,b);
 for repeat = 1:10
@@ -122,17 +122,19 @@ nonmu = mean(nonaccuracy,3); nonsigma = std(nonaccuracy,0, 3);
 
 save('Jresults\testAccurancyWithandWithoutOverlap.mat', 'mu','sigma',...
     'accuracy','nonmu','nonsigma','nonaccuracy','percentage' );
-figure, plot(mu(1,:));
+figure, plot(mu(1,:), 'b');
 hold on
 plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
+plot(mu(4,:), 'c');
 set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
 title('raw accuracy')
 
-figure, plot(nonmu(1,:));
+figure, plot(nonmu(1,:), 'b');
 hold on
 plot(nonmu(2,:), 'r');
 plot(nonmu(3,:), 'g');
+plot(nonmu(4,:), 'c');
 set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
 title('non accuracy')
 

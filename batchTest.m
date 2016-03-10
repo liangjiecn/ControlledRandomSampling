@@ -2,16 +2,22 @@
 % to avoid out of memory problem, please increase the virtual memory
 close all, 
 clear, 
-myCluster = parcluster('local');
-myCluster.NumWorkers = 6;
-saveProfile(myCluster);
-numWorkers = matlabpool('size');
-isPoolOpen = (numWorkers > 0);
-if(~isPoolOpen)
-    matlabpool;
-end
-%  batch('..\data\remote sensing data', '*_gt.mat', @(x)KNNSpatialFeatureRandomSampling(x,10));
-%  batch('..\data\remote sensing data', '*_gt.mat', @(x)NonlinearSVMSpatialFeatureRandomSampling(x,1));
+% myCluster = parcluster('local');
+% myCluster.NumWorkers = 6;
+% saveProfile(myCluster);
+% numWorkers = matlabpool('size');
+% isPoolOpen = (numWorkers > 0);
+% if(~isPoolOpen)
+%     matlabpool;
+% end
+batchRun('..\data\remoteData', '*.mat', @(x)MLRSpectralFeatureRandomSampling(x, 10));
+batchRun('..\data\remoteData', '*.mat', @(x)MLRSpectralFeatureRegionSampling(x, 10));
+batchRun('..\data\remoteData', '*.mat', @(x)MLRMorphologyRandomSampling(x,10));
+batchRun('..\data\remoteData', '*.mat', @(x)MLRMorphologyRegionSampling(x,10));
+batchRun('..\data\remoteData', '*.mat', @(x)MLR3DDWTRandomSampling(x,10));
+batchRun('..\data\remoteData', '*.mat', @(x)MLR3DDWTRegionSampling(x,10));
+
+% batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRandomSampling(x, 10));
 
 
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVMSpectralFeatureRandomSampling(x, 1));
@@ -40,9 +46,9 @@ end
 % 
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTRandomSampling(x,10));
 % batch('..\data\remote sensing data', '*.mat', @(x)LinearSVM3DDWTRegionSampling(x,10));
-
-testAccurancyWithMeanfilterRandomSampling;
-testAccurancyWithMeanfilterRegionSampling;
+% 
+% testAccurancyWithMeanfilterRandomSampling;
+% testAccurancyWithMeanfilterRegionSampling;
 
  
 
