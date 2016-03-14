@@ -10,12 +10,16 @@ clear,
 % if(~isPoolOpen)
 %     matlabpool;
 % end
-batchRun('..\data\remoteData', '*.mat', @(x)MLRSpectralFeatureRandomSampling(x, 10));
-batchRun('..\data\remoteData', '*.mat', @(x)MLRSpectralFeatureRegionSampling(x, 10));
-batchRun('..\data\remoteData', '*.mat', @(x)MLRMorphologyRandomSampling(x,10));
-batchRun('..\data\remoteData', '*.mat', @(x)MLRMorphologyRegionSampling(x,10));
-batchRun('..\data\remoteData', '*.mat', @(x)MLR3DDWTRandomSampling(x,10));
-batchRun('..\data\remoteData', '*.mat', @(x)MLR3DDWTRegionSampling(x,10));
+testAccurancyWithGaussianFilterRegionSampling_Weka
+testAccurancyWithMeanfilterRegionSampling_Weka
+testAccurancyWithMeanfilterRandomSampling_Weka
+testAccurancyWithGaussianFilterRandomSampling_Weka
+
+testAccurancyWithGaussianFilterRegionSampling
+testAccurancyWithMeanfilterRegionSampling
+testAccurancyWithMeanfilterRandomSampling
+testAccurancyWithGaussianFilterRandomSampling
+
 
 % batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRandomSampling(x, 10));
 

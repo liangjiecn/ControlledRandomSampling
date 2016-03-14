@@ -36,7 +36,7 @@ testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
 % accuracyC = zeros(numofClass,3);
 sampleRateList = [0.05, 0.1, 0.25];
-stdlist = [-1:0.5:2];
+stdlist = [-1:0.5:3];
 dataCube = zeros(m,n,b);
 for repeat = 1:10
     for i = 1 : length(sampleRateList)
@@ -55,7 +55,8 @@ for repeat = 1:10
         end
          for indexofstd = 1:length(stdlist)
             stdgaussian = 2^stdlist(indexofstd);
-            filter_mask = fspecial('gaussian',[9, 9], stdgaussian);
+            sizegaussian = floor((3*stdgaussian*2)/2)*2+1;  % make sure the size is odd
+            filter_mask = fspecial('gaussian',[sizegaussian, sizegaussian], stdgaussian);
             for j = 1:size(rawData,3)
                 dataCube(:,:,j) = imfilter(rawData(:,:,j), filter_mask);
             end 
@@ -97,12 +98,18 @@ for repeat = 1:10
 end
 
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
-save('Jresults\testAccurancyWithGaussianFilterRandomSampling.mat', 'mu','sigma',...
-    'accuracy' );
+resultsFile = ['Jresults\', mfilename, '.mat']; 
+save(resultsFile, 'mu','sigma', 'accuracy' );
 figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
-title('Classification accuracy using Gassian filter with different standard deviation.')
+set(gca,'XTickLabel',{'0.50';'0.71'; '1.00'; '1.41'; '2.00';  '2.83'; '4.00'; '5.66'; '8.00'});
+xlabel('Standard Deviation of the Gaussian Filter');
+ylabel('Overall Classification Accuracy');
+legend(' 5%', '10%', '25%');
+figName = ['Jresults\', mfilename,'.fig']; 
+hgsave(figName);
+
 
 

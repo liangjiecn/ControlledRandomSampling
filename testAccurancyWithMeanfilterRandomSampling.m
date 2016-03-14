@@ -13,7 +13,6 @@ end
 DataFile = 'Indian_pines_corrected.mat';
 addpath('..\data\remote sensing data');
 addpath('..\tools\libsvm-3.20\matlab');
-resultsFile = ['Jresults\', mfilename]; 
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3 
     return;
@@ -37,7 +36,7 @@ testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
 % accuracyC = zeros(numofClass,3);
 sampleRateList = [0.05, 0.1, 0.25];
-filterSizeList = [1 3, 5, 7, 9, 11];
+filterSizeList = 1:2:27;
 dataCube = zeros(m,n,b);
 for repeat = 1:10 % repeat 10 times
     for i = 1 : length(sampleRateList)
@@ -109,12 +108,19 @@ for repeat = 1:10 % repeat 10 times
 end
 
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
-save(resultsFile, 'mu','sigma','accuracy' );
+resultsFile = ['Jresults\', mfilename, '.mat']; 
+save(resultsFile, 'mu','sigma', 'accuracy' );
 figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
-set(gca,'XTickLabel',{'';'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
+set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'; '13*13'; ...
+                      '15*15'; '17*17';'19*19'; '21*21'; '23*23';'25*25';'27*27'});
+xlabel('Size of the Mean Filter');
+ylabel('Overall Classification Accuracy');
+legend(' 5%', '10%', '25%');
+figName = ['Jresults\', mfilename,'.fig']; 
+hgsave(figName);
 
 
 
