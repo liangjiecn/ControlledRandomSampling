@@ -11,7 +11,7 @@ if(~isPoolOpen)
     matlabpool;
 end
 DataFile = 'Indian_pines_corrected.mat';
-addpath('..\data\remote sensing data');
+addpath('..\data\remoteData');
 addpath('..\tools\libsvm-3.20\matlab');
 addpath('..\tools\RegionGrowing');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth

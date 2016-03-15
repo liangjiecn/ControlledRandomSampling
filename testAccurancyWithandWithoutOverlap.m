@@ -3,7 +3,7 @@
 close all 
 clear,
 myCluster = parcluster('local');
-myCluster.NumWorkers = 8;
+myCluster.NumWorkers = 6;
 saveProfile(myCluster);
 numWorkers = matlabpool('size');
 isPoolOpen = (numWorkers > 0);
@@ -34,9 +34,8 @@ testingSamples = cell(numofClass,1);
 trainingLabels = cell(numofClass,1);
 testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
-% accuracyC = zeros(numofClass,3);
 sampleRateList = [0.01, 0.05, 0.1, 0.25];
-filterSizeList = [1, 3, 5, 7, 9, 11];
+filterSizeList = 1:2:27;
 dataCube = zeros(m,n,b);
 for repeat = 1:10
     for i = 1 : length(sampleRateList)
@@ -51,7 +50,6 @@ for repeat = 1:10
             breakpoint = round(numel(class)*sampleRate);
             trainingIndex{c} = class(perm(1:breakpoint));
             testingIndex{c} = class(perm(breakpoint+1:end)); 
-          %  numofTest(c) = numel(testingIndex{c});
         end
         for indexofSize = 1:length(filterSizeList)
             filterSize = filterSizeList(indexofSize);
@@ -90,8 +88,7 @@ for repeat = 1:10
             nonmtestingLabels = vgroundTruth(nonmtestingIndex); 
             testingMap = zeros(m*n,1);
             testingMap(mtestingIndex) = mtestingLabels;
-%             figure; imagesc(reshape(testingMap,[m,n])); % check the training samples 
-          %  title(['Overlap = ', num2str(percentage*100), '% when sampling rate = ', num2str(sampleRate*100), '%', 'and filter size = ', num2str(filterSize)  ], 'FontSize', 10);
+%           figure; imagesc(reshape(testingMap,[m,n])); % check the training samples 
             mtrainingData = double(mtrainingData);
             %select parameters c and g
             log2cList = -1:1:16;
@@ -119,24 +116,39 @@ for repeat = 1:10
 end
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
 nonmu = mean(nonaccuracy,3); nonsigma = std(nonaccuracy,0, 3);
-
-save('Jresults\testAccurancyWithandWithoutOverlap.mat', 'mu','sigma',...
+mp = mean(percentage, 3); sigmap = std(percentage,0, 3);
+resultsFile = ['Jresults\', mfilename, '.mat']; 
+save(resultsFile, 'mu','sigma',...
     'accuracy','nonmu','nonsigma','nonaccuracy','percentage' );
-figure, plot(mu(1,:), 'b');
+figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
-plot(mu(4,:), 'c');
-set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
-title('raw accuracy')
+set(gca,'XLim',[1 14]);
+set(gca,'XTick',1:27);
+set(gca,'XTickLabel',{'1'; '3'; '5'; '7';  '9'; '11'; '13'; ...
+                      '15'; '17';'19'; '21'; '23';'25';'27'});
+xlabel('Size of the Mean Filter');
+ylabel('Overall Classification Accuracy');
+legend(' 5%', '10%', '25%');
+figName = ['Jresults\', mfilename,'_Accuracy.fig']; 
+hgsave(figName);
 
-figure, plot(nonmu(1,:), 'b');
+figure, plot(mp(1,:));
 hold on
-plot(nonmu(2,:), 'r');
-plot(nonmu(3,:), 'g');
-plot(nonmu(4,:), 'c');
-set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'});
-title('non accuracy')
+plot(mp(2,:), 'r');
+plot(mp(3,:), 'g');
+set(gca,'XLim',[1 14]);
+set(gca,'XTick',1:27);
+set(gca,'XTickLabel',{'1'; '3'; '5'; '7';  '9'; '11'; '13'; ...
+                      '15'; '17';'19'; '21'; '23';'25';'27'});
+xlabel('Size of the Mean Filter');
+ylabel('Percentage of Overlap');
+legend(' 5%', '10%', '25%');
+figName = ['Jresults\', mfilename,'_overlap.fig']; 
+hgsave(figName);
+
+
 
 
 

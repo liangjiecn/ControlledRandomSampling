@@ -85,12 +85,14 @@ end
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
 resultsFile = ['Jresults\', mfilename, '.mat']; 
 save(resultsFile, 'mu','sigma', 'accuracy' );
-figure, plot(mu(1,:));
+figure, plot(1:14, mu(1,:));
 hold on
-plot(mu(2,:), 'r');
+plot(1:length(filterSizeList),lengthmu(2,:), 'r');
 plot(mu(3,:), 'g');
-set(gca,'XTickLabel',{'1*1'; '3*3'; '5*5'; '7*7';  '9*9'; '11*11'; '13*13'; ...
-                      '15*15'; '17*17';'19*19'; '21*21'; '23*23';'25*25';'27*27'});
+set(gca,'XLim',[1 14]);
+set(gca,'XTick',1:27);
+set(gca,'XTickLabel',{'1'; '3'; '5'; '7';  '9'; '11'; '13'; ...
+                      '15'; '17';'19'; '21'; '23';'25';'27'});
 xlabel('Size of the Mean Filter');
 ylabel('Overall Classification Accuracy');
 legend(' 5%', '10%', '25%');

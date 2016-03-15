@@ -3,7 +3,7 @@
 close all 
 clear,
 DataFile = 'Indian_pines_corrected.mat';
-addpath('..\data\remote sensing data');
+addpath('..\data\remoteData');
 addpath('..\tools\RegionGrowing');
 addpath('..\tools\export_fig');
 addpath('..\tools\matlab2weka');
