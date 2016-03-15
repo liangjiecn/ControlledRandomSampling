@@ -10,15 +10,30 @@ clear,
 % if(~isPoolOpen)
 %     matlabpool;
 % end
-testAccurancyWithGaussianFilterRegionSampling_Weka
-testAccurancyWithMeanfilterRegionSampling_Weka
-testAccurancyWithMeanfilterRandomSampling_Weka
-testAccurancyWithGaussianFilterRandomSampling_Weka
 
-testAccurancyWithGaussianFilterRegionSampling
-testAccurancyWithMeanfilterRegionSampling
-testAccurancyWithMeanfilterRandomSampling
-testAccurancyWithGaussianFilterRandomSampling
+
+testAccurancyWithandWithoutOverlap_fixedSamples
+
+testAccurancyWithGaussianFilterRegionSamplingPaviaU_Weka
+testAccurancyWithMeanfilterRegionSamplingPaviaU_Weka
+testAccurancyWithMeanfilterRandomSamplingPaviaU_Weka
+testAccurancyWithGaussianFilterRandomSamplingPaviaU_Weka
+
+testAccurancyWithGaussianFilterRegionSamplingPaviaU
+testAccurancyWithMeanfilterRegionSamplingPaviaU
+testAccurancyWithMeanfilterRandomSamplingPaviaU
+testAccurancyWithGaussianFilterRandomSamplingPaviaU
+
+
+% testAccurancyWithGaussianFilterRegionSampling_Weka
+% testAccurancyWithMeanfilterRegionSampling_Weka
+% testAccurancyWithMeanfilterRandomSampling_Weka
+% testAccurancyWithGaussianFilterRandomSampling_Weka
+
+% testAccurancyWithGaussianFilterRegionSampling
+% testAccurancyWithMeanfilterRegionSampling
+% testAccurancyWithMeanfilterRandomSampling
+% testAccurancyWithGaussianFilterRandomSampling
 
 
 % batch('..\data\remote sensing data', '*.mat', @(x)NonlinearSVMSpectralFeatureRandomSampling(x, 10));

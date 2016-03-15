@@ -1,3 +1,4 @@
+% sampling fixed number of samples as training data
 % test the classification rate with the size of filter
 % use mean filter to cover the spatial information
 close all 
@@ -34,12 +35,12 @@ testingSamples = cell(numofClass,1);
 trainingLabels = cell(numofClass,1);
 testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
-sampleRateList = [0.01, 0.05, 0.1, 0.25];
+sampleNumList = [3, 5, 10, 20];
 filterSizeList = 1:2:27;
 dataCube = zeros(m,n,b);
 for repeat = 1:10
-    for i = 1 : length(sampleRateList)
-        sampleRate = sampleRateList(i);
+    for i = 1 : length(sampleNumList)
+        sampleNum = sampleNumList(i);
         for c = 1: numofClass
             cc  = double(c);
             class = find(vgroundTruth == c);
@@ -47,7 +48,7 @@ for repeat = 1:10
                 continue;
             end
             perm = randperm(numel(class));  %  random sampling
-            breakpoint = round(numel(class)*sampleRate);
+            breakpoint = sampleNum;
             trainingIndex{c} = class(perm(1:breakpoint));
             testingIndex{c} = class(perm(breakpoint+1:end)); 
         end
@@ -124,13 +125,14 @@ figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
+plot(mu(4,:), 'c');
 set(gca,'XLim',[1 14]);
 set(gca,'XTick',1:27);
 set(gca,'XTickLabel',{'1'; '3'; '5'; '7';  '9'; '11'; '13'; ...
                       '15'; '17';'19'; '21'; '23';'25';'27'});
 xlabel('Size of the Mean Filter');
 ylabel('Overall Classification Accuracy');
-legend(' 5%', '10%', '25%');
+legend('3', '5', '10', '20');
 figName = ['Jresults\', mfilename,'_Accuracy.fig']; 
 hgsave(figName);
 
@@ -138,12 +140,19 @@ figure, plot(mp(1,:));
 hold on
 plot(mp(2,:), 'r');
 plot(mp(3,:), 'g');
+plot(mp(4,:), 'c');
 set(gca,'XLim',[1 14]);
 set(gca,'XTick',1:27);
 set(gca,'XTickLabel',{'1'; '3'; '5'; '7';  '9'; '11'; '13'; ...
                       '15'; '17';'19'; '21'; '23';'25';'27'});
 xlabel('Size of the Mean Filter');
 ylabel('Percentage of Overlap');
-legend(' 5%', '10%', '25%');
+legend('3', '5', '10', '20');
 figName = ['Jresults\', mfilename,'_overlap.fig']; 
 hgsave(figName);
+
+
+
+
+
+
