@@ -1,12 +1,11 @@
-function MLRSpectralFeatureRegionSampling(DataFile, timeofRepeatition)
-% hyperspectral classification with spectral feature using random sampling
-% and linear SVM
+function RFC3DDWTRegionSampling(DataFile, timeofRepeatition)
+% 
 addpath('..\data\remoteData');
-addpath('..\Matlab\tools\libsvm-3.20\matlab');
+addpath('..\tools\libsvm-3.20\matlab');
 addpath('..\tools\RegionGrowing');
-addpath('.\MLR');
+addpath('..\tools\matlab2weka');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
-if ndims(rawData) ~= 3
+if ndims(rawData) ~= 3 % save time
     return;
 end
 indexof_= find(DataFile == '_',1);
@@ -17,10 +16,9 @@ else
 end
 resultsFile = ['Jresults\', subfix, '_', mfilename, '.mat']; 
 groundTruth = importdata([subfix, '_gt.mat']);
-dataCube = normalise(rawData, 'percent',1);
-% figure, imagesc(groundTruth);
-[m, n, b] = size(rawData);
-vdataCube =  reshape(dataCube, [m*n,b]);
+[m, n, b] = size(rawData); 
+feats = single(dwt3d_feature(rawData));
+vdataCube = reshape(feats,[m*n,15*b]);
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));
 trainingSamples = cell(numofClass,1);
@@ -53,22 +51,15 @@ for i = 1 : length(sampleRateList)
     mtestingIndex = cell2mat(testingIndex); 
     trainingMap = zeros(m*n,1);
     trainingMap(mtrainingIndex) = mtrainingLabels;
-%     figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+%     figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
     mtrainingData = double(mtrainingData);
-    %   training 
-    [dimen,num] = size(mtrainingData');
-    K = [ones(1,num); mtrainingData'];
-    y = mtrainingLabels';
-    lambda = 0.1;
-    [w, L] = LORSAL_GCK(K,y,lambda,400);
-%   testing
-    im = vdataCube';
-    p = splitimage(im, w);
-    [maxp, resultClass] = max(p);
-    resultClass = resultClass';
-    predicted_labels = resultClass(mtestingIndex, :);
-    figure, imagesc(reshape(resultClass,[m,n]));
-    results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA  
+%   classification
+	predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData);  
+	results = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
+	accuracy(i, repeat) = results.OA;
+	resultMap = vgroundTruth;
+	resultMap(mtestingIndex) = predicted_labels;
+%figure; imagesc(reshape(resultMap,[m,n]));
 end
 end
 save(resultsFile, 'results');

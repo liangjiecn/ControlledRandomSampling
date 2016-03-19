@@ -10,7 +10,7 @@ isPoolOpen = (numWorkers > 0);
 if(~isPoolOpen)
     matlabpool;
 end
-DataFile = 'Indian_pines_corrected.mat';
+DataFile = 'PaviaU.mat';
 addpath('..\data\remoteData');
 addpath('..\tools\libsvm-3.20\matlab');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
@@ -24,6 +24,7 @@ else
     subfix = DataFile(1:indexof_-1);
 end
 groundTruth = importdata([subfix, '_gt.mat']);
+groundTruth = double(groundTruth);
 [m, n, b] = size(rawData); 
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));

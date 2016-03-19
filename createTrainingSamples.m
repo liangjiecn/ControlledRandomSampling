@@ -4,6 +4,7 @@ function [trainingIndex, testingIndex, varargout] = createTrainingSamples(ground
 % count the regions in each class
 % randomly create the seeds in each region, and then grow the seeds base on
 % on the sampling rate in each region  
+addpath('..\tools\RegionGrowing');
 numofClass = max(groundTruth(:));
 trainingIndex = cell(numofClass,1);
 testingIndex = cell(numofClass,1);

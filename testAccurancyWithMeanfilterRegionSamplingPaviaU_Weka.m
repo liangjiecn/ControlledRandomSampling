@@ -2,7 +2,7 @@
 % use mean filter to cover the spatial information
 close all 
 clear,
-DataFile = 'Indian_pines_corrected.mat';
+DataFile = 'PaviaU.mat';
 addpath('..\data\remoteData');
 addpath('..\tools\export_fig');
 addpath('..\tools\matlab2weka');
@@ -87,7 +87,7 @@ resultsFile = ['Jresults\', mfilename, '.mat'];
 save(resultsFile, 'mu','sigma', 'accuracy' );
 figure, plot(1:14, mu(1,:));
 hold on
-plot(1:length(filterSizeList),lengthmu(2,:), 'r');
+plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
 set(gca,'XLim',[1 14]);
 set(gca,'XTick',1:27);

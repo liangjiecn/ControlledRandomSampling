@@ -1,9 +1,10 @@
-function MLRSpectralFeatureRandomSampling(DataFile, timeofRepeatition)
+function RFCMorphologyRegionSampling(DataFile, timeofRepeatition)
 % hyperspectral classification with spectral feature using random sampling
-% and linear SVM
+% and nonlinear SVM
 addpath('..\data\remoteData');
 addpath('..\tools\libsvm-3.20\matlab');
-addpath('.\MLR');
+addpath('..\tools\RegionGrowing');
+addpath('..\tools\matlab2weka');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3
     return;
@@ -16,34 +17,28 @@ else
 end
 resultsFile = ['Jresults\', subfix, '_', mfilename, '.mat']; 
 groundTruth = importdata([subfix, '_gt.mat']);
-dataCube = normalise(rawData, 'percent',1);
+dataCube = mm(rawData);
 % figure, imagesc(groundTruth);
-[m, n, b] = size(rawData);
+[m, n, b] = size(dataCube);
 vdataCube =  reshape(dataCube, [m*n,b]);
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));
-trainingIndex = cell(numofClass,1);
-testingIndex = cell(numofClass,1);
 trainingSamples = cell(numofClass,1);
 testingSamples = cell(numofClass,1);
 trainingLabels = cell(numofClass,1);
 testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
 sampleRateList = [0.05, 0.1, 0.25];
-
 for repeat = 1:timeofRepeatition
 for i = 1 : length(sampleRateList)
-    sampleRate = sampleRateList(i);
+    samplingRate = sampleRateList(i);
+    if i == 1 % try to use the same seeds when using different sampling rate
+        [trainingIndex, testingIndex, seeds] = createTrainingSamples(groundTruth, samplingRate);
+    else
+        [trainingIndex, testingIndex] = createTrainingSamples(groundTruth, samplingRate, seeds);
+    end
     for c = 1: numofClass
         cc  = double(c);
-        class = find(vgroundTruth == c);
-        if isempty(class)
-            continue;
-        end
-        perm = randperm(numel(class)); 
-        breakpoint = round(numel(class)*sampleRate);
-        trainingIndex{c} = class(perm(1:breakpoint));
-        testingIndex{c} = class(perm(breakpoint+1:end));
         trainingSamples{c} = vdataCube(trainingIndex{c},:);
         trainingLabels{c} = ones(length(trainingIndex{c}),1)*cc;
         testingSamples{c} = vdataCube(testingIndex{c},:);
@@ -58,22 +53,15 @@ for i = 1 : length(sampleRateList)
     mtestingIndex = cell2mat(testingIndex); 
     trainingMap = zeros(m*n,1);
     trainingMap(mtrainingIndex) = mtrainingLabels;
-    figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
-    mtrainingData = double(mtrainingData);  
-%   training 
-    [dimen,num] = size(mtrainingData');
-    K = [ones(1,num); mtrainingData'];
-    y = mtrainingLabels';
-    lambda = 0.1;
-    [w, L] = LORSAL_GCK(K,y,lambda,400);
-%   testing
-    im = vdataCube';
-    p = splitimage(im, w);
-    [maxp, resultClass] = max(p);
-    resultClass = resultClass';
-    predicted_labels = resultClass(mtestingIndex, :);
-    figure, imagesc(reshape(resultClass,[m,n]));
-    results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA 
+%   figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+    mtrainingData = double(mtrainingData);
+%   classification
+	predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData);  
+	results = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
+	accuracy(i, repeat) = results.OA;
+	resultMap = vgroundTruth;
+	resultMap(mtestingIndex) = predicted_labels;
+%figure; imagesc(reshape(resultMap,[m,n]));
 end
 end
 save(resultsFile, 'results');

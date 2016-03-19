@@ -25,6 +25,7 @@ else
     subfix = DataFile(1:indexof_-1);
 end
 groundTruth = importdata([subfix, '_gt.mat']);
+groundTruth = double(groundTruth);
 [m, n, b] = size(rawData); 
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));

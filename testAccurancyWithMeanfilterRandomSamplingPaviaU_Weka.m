@@ -2,7 +2,7 @@
 % use mean filter to cover the spatial information
 close all 
 clear,
-DataFile = 'Indian_pines_corrected.mat';
+DataFile = 'PaviaU.mat';
 addpath('..\data\remoteData');
 addpath('..\tools\export_fig');
 addpath('..\tools\matlab2weka');
