@@ -66,7 +66,7 @@ for repeat = 1:10 % repeat 10 times
     %       figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
             mtrainingData = double(mtrainingData);
 %           classification
-            predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData);  % random forest classifier
+            predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData, 4);  % Logistic Regression
             results = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
             accuracy(i,indexofSize,repeat) = results.OA;
             resultMap = vgroundTruth;
@@ -85,9 +85,9 @@ end
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
 resultsFile = ['Jresults\', mfilename, '.mat']; 
 save(resultsFile, 'mu','sigma', 'accuracy' );
-figure, plot(1:14, mu(1,:));
+figure, plot( mu(1,:));
 hold on
-plot(1:length(filterSizeList),lengthmu(2,:), 'r');
+plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
 set(gca,'XLim',[1 14]);
 set(gca,'XTick',1:27);

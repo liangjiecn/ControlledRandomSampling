@@ -6,7 +6,6 @@ DataFile = 'Indian_pines_corrected.mat';
 addpath('..\data\remoteData');
 addpath('..\tools\export_fig');
 addpath('..\tools\matlab2weka');
-
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3 
     return;
@@ -33,18 +32,24 @@ filterSizeList = 1:2:27;
 dataCube = zeros(m,n,b);
 for repeat = 1:10 % repeat 10 times
     for i = 1 : length(sampleRateList)
-        samplingRate = sampleRateList(i);
-        if i == 1 % try to use the same seeds when using different sampling rate
-            [trainingIndex, testingIndex, seeds] = createTrainingSamples(groundTruth, samplingRate);
-        else
-            [trainingIndex, testingIndex] = createTrainingSamples(groundTruth, samplingRate, seeds);
+        sampleRate = sampleRateList(i);
+        for c = 1: numofClass
+            cc  = double(c);
+            class = find(vgroundTruth == c);
+            if isempty(class)
+                continue;
+            end
+            perm = randperm(numel(class));  %  random sampling
+            breakpoint = round(numel(class)*sampleRate);
+            trainingIndex{c} = class(perm(1:breakpoint));
+            testingIndex{c} = class(perm(breakpoint+1:end));
+            numofTest(c) = numel(testingIndex{c});
         end
-        
         for indexofSize = 1:length(filterSizeList)
             filterSize = filterSizeList(indexofSize);
             filter_mask=1/(filterSize*filterSize)*ones(filterSize,filterSize);
             for j = 1:size(rawData,3)
-                dataCube(:,:,j)=conv2( rawData(:,:,j),filter_mask,'same');
+                dataCube(:,:,j) = conv2( rawData(:,:,j),filter_mask,'same');
             end 
             dataCube = normalise(dataCube,'percent', 1);
             vdataCube = reshape(dataCube,[m*n,b]);
@@ -66,28 +71,22 @@ for repeat = 1:10 % repeat 10 times
     %       figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
             mtrainingData = double(mtrainingData);
 %           classification
-            predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData);  % random forest classifier
+            predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData， 2); % Gaussian Process Regression  
             results = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
             accuracy(i,indexofSize,repeat) = results.OA;
             resultMap = vgroundTruth;
             resultMap(mtestingIndex) = predicted_labels;
-%           figure; imagesc(reshape(resultMap,[m,n]));   
-%             axis image,
-%             axis off,
-%             figName = ['Jresults\maps\', mfilename,'_sampling' num2str(i), '_std', num2str(indexofSize), '.fig']; 
-%             hgsave(figName);
-%             hgload(figName);
-%             setImage('Jresults\maps');
-
+%           figure; imagesc(reshape(resultMap,[m,n]));
         end
     end
 end
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
 resultsFile = ['Jresults\', mfilename, '.mat']; 
-save(resultsFile, 'mu','sigma', 'accuracy' );
-figure, plot(1:14, mu(1,:));
+save(resultsFile, 'mu','sigma',...
+    'accuracy' );
+figure, plot(mu(1,:));
 hold on
-plot(1:length(filterSizeList),lengthmu(2,:), 'r');
+plot(mu(2,:), 'r');
 plot(mu(3,:), 'g');
 set(gca,'XLim',[1 14]);
 set(gca,'XTick',1:27);
@@ -98,7 +97,6 @@ ylabel('Overall Classification Accuracy');
 legend(' 5%', '10%', '25%');
 figName = ['Jresults\', mfilename,'.fig']; 
 hgsave(figName);
-
 
 
 

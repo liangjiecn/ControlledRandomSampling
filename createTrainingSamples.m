@@ -22,6 +22,10 @@ for c = 1: numofClass
     for indexofRegion = 1 : numRegions
         regionIndex = CC.PixelIdxList{indexofRegion};
         numofTraingInRegion = round(numel(regionIndex)*samplingRate);
+%         if numofTraingInRegion == 0 % if the regions multiply samplingRate is less than 1, then skip this region
+%             trainingRegion{indexofRegion} = [];
+%             continue;
+%         end
         if nargin == 2
             randpoint = randi([1,numel(regionIndex)],1,1);
             [indexR, indexC] = ind2sub( [m,n], regionIndex(randpoint));
