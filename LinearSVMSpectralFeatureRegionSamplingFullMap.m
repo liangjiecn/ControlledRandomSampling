@@ -1,10 +1,10 @@
-function MLRSpectralFeatureRegionSampling(DataFile, timeofRepeatition)
+function LinearSVMSpectralFeatureRegionSamplingFullMap(DataFile, timeofRepeatition)
 % hyperspectral classification with spectral feature using random sampling
 % and linear SVM
-addpath('..\data\remoteData');
+close all,
+addpath('..\data\remote sensing data');
 addpath('..\Matlab\tools\libsvm-3.20\matlab');
 addpath('..\tools\RegionGrowing');
-addpath('.\MLR');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3
     return;
@@ -17,6 +17,7 @@ else
 end
 resultsFile = ['Jresults\', subfix, '_', mfilename, '.mat']; 
 groundTruth = importdata([subfix, '_gt.mat']);
+groundTruth = double(groundTruth);
 dataCube = normalise(rawData, 'percent',1);
 % figure, imagesc(groundTruth);
 [m, n, b] = size(rawData);
@@ -51,24 +52,48 @@ for i = 1 : length(sampleRateList)
     mtestingData = cell2mat(testingSamples);
     mtestingLabels = cell2mat(testingLabels);
     mtestingIndex = cell2mat(testingIndex); 
+% add background pixels
+%     class = find(vgroundTruth == 0);
+%     testingBgIndex = class;
+%     testingBgSamples = vdataCube(testingBgIndex,:);
+%     testingBgLabels = ones(length(testingBgIndex),1)*0;
+%     mtestingData = cell2mat(testingSamples);
+%     mtestingLabels = cell2mat(testingLabels);
+%     mtestingIndex = cell2mat(testingIndex);  
+%     mtestingData = cat(1,mtestingData, testingBgSamples);
+%     mtestingLabels = cat(1,mtestingLabels, testingBgLabels);
+%     mtestingIndex = cat(1,mtestingIndex, testingBgIndex);
+%........................................
     trainingMap = zeros(m*n,1);
     trainingMap(mtrainingIndex) = mtrainingLabels;
-%     figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples 
+    figure, imagesc(reshape(trainingMap,[m,n])); % check the training samples
+    axis image,
+	axis off,
+	figName = ['Jresults\maps\', subfix, '_', mfilename, num2str(samplingRate*100), '_train.fig']; 
+    hgsave(figName);
     mtrainingData = double(mtrainingData);
-    %   training 
-    [dimen,num] = size(mtrainingData');
-    K = [ones(1,num); mtrainingData'];
-    y = mtrainingLabels';
-    lambda = 0.1;
-    [w, L] = LORSAL_GCK(K,y,lambda,400);
-%   testing
-    im = vdataCube';
-    p = splitimage(im, w);
-    [maxp, resultClass] = max(p);
-    resultClass = resultClass';
-    predicted_labels = resultClass(mtestingIndex, :);
-    figure, imagesc(reshape(resultClass,[m,n]));
-    results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA  
+    %select parameters c and g
+    log2cList = -1:1:16;
+    cv = zeros(length(log2cList), 1);
+    parfor indexC = 1:length(log2cList)
+        log2c = log2cList(indexC);
+        cmd = ['-q -t 0 -v 5 -c ', num2str(2^log2c)];
+        cv(indexC) = svmtrain(mtrainingLabels, mtrainingData, cmd);
+    end
+    [~, indexcv]= max(cv);
+    bestc = 2^log2cList(indexcv); 
+    optPara = [ '-q -t 0 -c ', num2str(bestc)];
+    svm = svmtrain(mtrainingLabels, mtrainingData, optPara);   
+    mtestingData = double(mtestingData);
+    [predicted_labels, ~, ~] = svmpredict(mtestingLabels, mtestingData, svm);  
+    resultMap = vgroundTruth;
+    resultMap(mtestingIndex) = predicted_labels;
+    figure, imagesc(reshape(resultMap,[m,n]));
+	axis image,
+	axis off,
+	figName = ['Jresults\maps\', subfix, '_', mfilename, num2str(samplingRate*100), '.fig']; 
+    hgsave(figName);
+   % results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA  
 end
 end
-save(resultsFile, 'results');
+%save(resultsFile, 'results');

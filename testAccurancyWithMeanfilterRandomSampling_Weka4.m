@@ -2,17 +2,10 @@
 % use mean filter to cover the spatial information
 close all 
 clear,
-myCluster = parcluster('local');
-myCluster.NumWorkers = 6;
-saveProfile(myCluster);
-numWorkers = matlabpool('size');
-isPoolOpen = (numWorkers > 0);
-if(~isPoolOpen)
-    matlabpool;
-end
-DataFile = 'PaviaU.mat';
+DataFile = 'Indian_pines_corrected.mat';
 addpath('..\data\remoteData');
-addpath('..\tools\libsvm-3.20\matlab');
+addpath('..\tools\export_fig');
+addpath('..\tools\matlab2weka');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3 
     return;
@@ -24,7 +17,6 @@ else
     subfix = DataFile(1:indexof_-1);
 end
 groundTruth = importdata([subfix, '_gt.mat']);
-groundTruth = double(groundTruth);
 [m, n, b] = size(rawData); 
 vgroundTruth = reshape(groundTruth, [numel(groundTruth),1]);
 numofClass = max(groundTruth(:));
@@ -35,7 +27,6 @@ testingSamples = cell(numofClass,1);
 trainingLabels = cell(numofClass,1);
 testingLabels = cell(numofClass,1);
 numofTest = zeros(numofClass,1);
-% accuracyC = zeros(numofClass,3);
 sampleRateList = [0.05, 0.1, 0.25];
 filterSizeList = 1:2:27;
 dataCube = zeros(m,n,b);
@@ -69,7 +60,6 @@ for repeat = 1:10 % repeat 10 times
                 testingSamples{c} = vdataCube(testingIndex{c},:);
                 testingLabels{c} = ones(length(testingIndex{c}),1)*cc;
             end
-
             mtrainingData = cell2mat(trainingSamples);
             mtrainingLabels = cell2mat(trainingLabels);
             mtrainingIndex = cell2mat(trainingIndex);
@@ -80,37 +70,20 @@ for repeat = 1:10 % repeat 10 times
             trainingMap(mtrainingIndex) = mtrainingLabels;
     %       figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
             mtrainingData = double(mtrainingData);
-            %select parameters c and g
-            log2cList = -1:1:16;
-            cv = zeros(length(log2cList), 1);
-            parfor indexC = 1:length(log2cList)
-                log2c = log2cList(indexC);
-                cmd = ['-q -t 0 -v 5 -c ', num2str(2^log2c)];
-                cv(indexC) = svmtrain(mtrainingLabels, mtrainingData, cmd);
-            end
-            [~, indexcv]= max(cv);
-            bestc = 2^log2cList(indexcv); 
-            optPara = [ '-q -t 0 -c ', num2str(bestc)];
-            svm = svmtrain(mtrainingLabels, mtrainingData,  optPara);   
-            mtestingData = double(mtestingData);
-            [predicted_label, rr, prob_estimates] = svmpredict(mtestingLabels, mtestingData, svm);  
-            accuracy(i,indexofSize,repeat) = rr(1);
+%           classification
+            predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData， 4); % Logistic Regression  
+            results = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
+            accuracy(i,indexofSize,repeat) = results.OA;
             resultMap = vgroundTruth;
-            resultMap(mtestingIndex) = predicted_label;
-%             figure; imagesc(reshape(resultMap,[m,n]));
-            % accurancy in each class
-%             resultC = predicted_label == mtestingLabels;
-%             for c = 1:numofClass
-%                 accuracyC(c,i) = sum(resultC(find(mtestingLabels == c)))/numofTest(c);
-%             end
-    %         save(resultsFile, 'accuracy', 'accuracyC' );
+            resultMap(mtestingIndex) = predicted_labels;
+%           figure; imagesc(reshape(resultMap,[m,n]));
         end
     end
 end
-
 mu = mean(accuracy,3); sigma = std(accuracy,0, 3);
 resultsFile = ['Jresults\', mfilename, '.mat']; 
-save(resultsFile, 'mu','sigma', 'accuracy' );
+save(resultsFile, 'mu','sigma',...
+    'accuracy' );
 figure, plot(mu(1,:));
 hold on
 plot(mu(2,:), 'r');

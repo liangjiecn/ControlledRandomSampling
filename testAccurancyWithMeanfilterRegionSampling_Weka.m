@@ -66,7 +66,7 @@ for repeat = 1:10 % repeat 10 times
     %       figure; imagesc(reshape(trainingMap,[m,n])); % check the training samples 
             mtrainingData = double(mtrainingData);
 %           classification
-            predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData);  
+            predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData);  % random forest classifier
             results = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
             accuracy(i,indexofSize,repeat) = results.OA;
             resultMap = vgroundTruth;

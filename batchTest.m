@@ -2,27 +2,34 @@
 % to avoid out of memory problem, please increase the virtual memory
 close all, 
 clear, 
-% myCluster = parcluster('local');
-% myCluster.NumWorkers = 6;
-% saveProfile(myCluster);
-% numWorkers = matlabpool('size');
-% isPoolOpen = (numWorkers > 0);
-% if(~isPoolOpen)
-%     matlabpool;
-% end
+myCluster = parcluster('local');
+myCluster.NumWorkers = 6;
+saveProfile(myCluster);
+numWorkers = matlabpool('size');
+isPoolOpen = (numWorkers > 0);
+if(~isPoolOpen)
+    matlabpool;
+end
+LinearSVMSpectralFeatureRandomSamplingFullMap('Indian_pines_corrected.mat', 1);
+LinearSVMSpectralFeatureRegionSamplingFullMap('Indian_pines_corrected.mat', 1);
+LinearSVMSpectralFeatureRandomSamplingFullMap('PaviaU.mat', 1);
+LinearSVMSpectralFeatureRegionSamplingFullMap('PaviaU.mat', 1);
+% testAccurancyWithMeanfilterRegionSampling_Weka2
+% testAccurancyWithMeanfilterRegionSampling_Weka4
+% testAccurancyWithMeanfilterRandomSampling_Weka2
+% testAccurancyWithMeanfilterRandomSampling_Weka4
 
-
-testAccurancyWithandWithoutOverlap_fixedSamples
-
-testAccurancyWithGaussianFilterRegionSamplingPaviaU_Weka
-testAccurancyWithMeanfilterRegionSamplingPaviaU_Weka
-testAccurancyWithMeanfilterRandomSamplingPaviaU_Weka
-testAccurancyWithGaussianFilterRandomSamplingPaviaU_Weka
-
-testAccurancyWithGaussianFilterRegionSamplingPaviaU
-testAccurancyWithMeanfilterRegionSamplingPaviaU
-testAccurancyWithMeanfilterRandomSamplingPaviaU
-testAccurancyWithGaussianFilterRandomSamplingPaviaU
+% testAccurancyWithandWithoutOverlap_fixedSamples
+% 
+% testAccurancyWithGaussianFilterRegionSamplingPaviaU_Weka
+% testAccurancyWithMeanfilterRegionSamplingPaviaU_Weka
+% testAccurancyWithMeanfilterRandomSamplingPaviaU_Weka
+% testAccurancyWithGaussianFilterRandomSamplingPaviaU_Weka
+% 
+% testAccurancyWithGaussianFilterRegionSamplingPaviaU
+% testAccurancyWithMeanfilterRegionSamplingPaviaU
+% testAccurancyWithMeanfilterRandomSamplingPaviaU
+% testAccurancyWithGaussianFilterRandomSamplingPaviaU
 
 
 % testAccurancyWithGaussianFilterRegionSampling_Weka

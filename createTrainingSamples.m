@@ -4,6 +4,7 @@ function [trainingIndex, testingIndex, varargout] = createTrainingSamples(ground
 % count the regions in each class
 % randomly create the seeds in each region, and then grow the seeds base on
 % on the sampling rate in each region  
+addpath('..\tools\RegionGrowing');
 numofClass = max(groundTruth(:));
 trainingIndex = cell(numofClass,1);
 testingIndex = cell(numofClass,1);
@@ -21,6 +22,10 @@ for c = 1: numofClass
     for indexofRegion = 1 : numRegions
         regionIndex = CC.PixelIdxList{indexofRegion};
         numofTraingInRegion = round(numel(regionIndex)*samplingRate);
+%         if numofTraingInRegion == 0 % if the regions multiply samplingRate is less than 1, then skip this region
+%             trainingRegion{indexofRegion} = [];
+%             continue;
+%         end
         if nargin == 2
             randpoint = randi([1,numel(regionIndex)],1,1);
             [indexR, indexC] = ind2sub( [m,n], regionIndex(randpoint));

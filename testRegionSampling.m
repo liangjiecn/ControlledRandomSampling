@@ -26,6 +26,7 @@ trainingSamples = cell(numofClass,1);
 testingSamples = cell(numofClass,1);
 trainingLabels = cell(numofClass,1);
 testingLabels = cell(numofClass,1);
+numofTrain = zeros(numofClass,1);
 numofTest = zeros(numofClass,1);
 sampleRateList = [0.05, 0.1, 0.25];
 for i = 1 : length(sampleRateList)
@@ -39,10 +40,12 @@ for i = 1 : length(sampleRateList)
         cc  = double(c);
         trainingSamples{c} = vdataCube(trainingIndex{c},:);
         trainingLabels{c} = ones(length(trainingIndex{c}),1)*cc;
+        numofTrain(c) = length(trainingIndex{c}); % check the number of training data
         testingSamples{c} = vdataCube(testingIndex{c},:);
         testingLabels{c} = ones(length(testingIndex{c}),1)*cc;
         numofTest(c) = numel(testingIndex{c});
     end
+    numofTrain./(numofTest + numofTrain)
     mtrainingLabels = cell2mat(trainingLabels);
     mtrainingIndex = cell2mat(trainingIndex);
     mtestingLabels = cell2mat(testingLabels);
