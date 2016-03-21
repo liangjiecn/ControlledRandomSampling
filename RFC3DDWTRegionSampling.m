@@ -55,8 +55,7 @@ for i = 1 : length(sampleRateList)
     mtrainingData = double(mtrainingData);
 %   classification
 	predicted_labels = wekaClassificationWarp(mtrainingData, mtrainingLabels, mtestingData);  
-	results = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
-	accuracy(i, repeat) = results.OA;
+	results(i, repeat) = assessment(mtestingLabels, predicted_labels, 'class' ); % calculate OA, kappa, AA    
 	resultMap = vgroundTruth;
 	resultMap(mtestingIndex) = predicted_labels;
 %figure; imagesc(reshape(resultMap,[m,n]));
