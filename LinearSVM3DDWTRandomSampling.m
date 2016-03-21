@@ -1,6 +1,6 @@
 function LinearSVM3DDWTRandomSampling(DataFile, timeofRepeatition)
 % 
-addpath('..\data\remote sensing data');
+addpath('..\data\remoteData');
 addpath('..\tools\libsvm-3.20\matlab');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth
 if ndims(rawData) ~= 3 % save time

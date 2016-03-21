@@ -1,7 +1,7 @@
 function LinearSVMMorphologyRegionSampling(DataFile, timeofRepeatition)
 % hyperspectral classification with spectral feature using random sampling
 % and nonlinear SVM
-addpath('..\data\remote sensing data');
+addpath('..\data\remoteData');
 addpath('..\tools\libsvm-3.20\matlab');
 addpath('..\tools\RegionGrowing');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth

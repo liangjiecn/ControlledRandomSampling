@@ -1,6 +1,6 @@
 function LinearSVM3DDWTRegionSampling(DataFile, timeofRepeatition)
 % 
-addpath('..\data\remote sensing data');
+addpath('..\data\remoteData');
 addpath('..\tools\libsvm-3.20\matlab');
 addpath('..\tools\RegionGrowing');
 rawData = importdata(DataFile);% Load hyperspectral image and groud truth

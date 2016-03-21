@@ -1,4 +1,6 @@
 results/
 Jresults/
 temp/
+*.orig
 *.asv
+batchTest.m
