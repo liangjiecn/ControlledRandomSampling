@@ -1,4 +1,4 @@
-This is the program associated to my work "EVALUATION OF JOINT SPECTRAL-SPATIAL INFORMATION BASED HYPERSPECTRAL
-IMAGE CLASSIFICATION METHODS".
-
-Author: Jie Liang jie.liang@anu.edu.au
+This is the program associated to my work "On the Sampling Strategy for Evaluation of Spectral-spatial Methods in Hyperspectral Image Classification".
+Please contact me if you have further questions. 
+Author: Jie Liang 
+Email: jie.liang@anu.edu.au
